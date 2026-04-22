@@ -9,10 +9,19 @@
 {{ $imagesTemp := strings.Split $imagesTemp "," }}
 {{ $images := slice}}
 {{ range $imagesTemp }}
-    {{ if or (strings.HasPrefix . "http:") (strings.HasPrefix . "https:") }}
-        {{ $images = $images | append (resources.GetRemote .) }}
+    {{ $img := . | strings.TrimSpace }}
+    {{ if or (strings.HasPrefix $img "http:") (strings.HasPrefix $img "https:") }}
+        {{ $r := resources.GetRemote $img }}
+        {{ if $r }}
+            {{ $images = $images | append $r }}
+        {{ end }}
     {{ else }}
-        {{ $images = $images | append ($page.Match .) }}
+        {{ $matches := $page.Match $img }}
+        {{ range $matches }}
+            {{ if . }}
+                {{ $images = $images | append . }}
+            {{ end }}
+        {{ end }}
     {{ end }}
 {{ end }}
 
